@@ -125,17 +125,14 @@ Add the following to your `configuration.yaml`:
 
 ```yaml
 houston_trash:
-  routes:
-    - name: "My Trash"  # Friendly name for the route
-      route_id: "NE4TH_08"    # Route ID from the city's system
+  url: "https://api.recollect.net/api/areas/HoustonTX/services/1231/pages/en-US/place_calendar.json"
 ```
 
 ### Configuration Variables
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| name | Yes | Friendly name for the route |
-| route_id | Yes | Route ID from the city's system (e.g., NE4TH_08) |
+| url | Yes | URL to the Recollect API |
 
 ## Available Components
 

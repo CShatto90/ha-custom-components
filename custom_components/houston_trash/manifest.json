@@ -1,0 +1,9 @@
+{
+  "domain": "houston_trash",
+  "name": "Houston Trash Collection",
+  "documentation": "https://github.com/yourusername/ha-custom-components",
+  "dependencies": [],
+  "codeowners": ["@yourusername"],
+  "requirements": [],
+  "version": "1.0.0"
+} 
