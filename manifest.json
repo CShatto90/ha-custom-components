@@ -1,0 +1,9 @@
+{
+  "name": "Home Assistant Custom Components Collection",
+  "version": "1.0.0",
+  "url": "https://gitea.shatto.cloud/Shatti/ha-custom-components",
+  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/README.md",
+  "issue_tracker": "https://gitea.shatto.cloud/Shatti/ha-custom-components/issues",
+  "codeowners": ["@Shatti"],
+  "iot_class": "cloud_polling"
+} 

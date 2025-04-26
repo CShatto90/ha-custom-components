@@ -1,0 +1,10 @@
+{
+  "domain": "houston_heavy_trash",
+  "name": "Houston Heavy Trash",
+  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components",
+  "dependencies": [],
+  "codeowners": ["@Shatti"],
+  "requirements": ["aiohttp>=3.8.0"],
+  "version": "1.0.0",
+  "iot_class": "cloud_polling"
+} 
