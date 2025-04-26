@@ -1,4 +1,4 @@
-"""Config flow for Houston Heavy Trash."""
+"""Config flow for Houston Trash."""
 from __future__ import annotations
 
 import voluptuous as vol
@@ -7,14 +7,14 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, DASHBOARD_URL
+from .const import DOMAIN, CONF_ROUTES, CONF_NAME, CONF_ROUTE_ID, DASHBOARD_URL
 
 CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Required("routes"): [
+        vol.Required(CONF_ROUTES): [
             {
-                vol.Required("name"): str,
-                vol.Required("route_id"): str,
+                vol.Required(CONF_NAME): str,
+                vol.Required(CONF_ROUTE_ID): str,
             }
         ]
     }
@@ -22,17 +22,17 @@ CONFIG_SCHEMA = vol.Schema(
 
 async def validate_config(hass: HomeAssistant, data: dict) -> None:
     """Validate the configuration."""
-    if not isinstance(data.get("routes"), list):
+    if not isinstance(data.get(CONF_ROUTES), list):
         raise ValueError("Routes must be a list")
     
-    for route in data["routes"]:
-        if not isinstance(route.get("name"), str) or not route["name"].strip():
+    for route in data[CONF_ROUTES]:
+        if not isinstance(route.get(CONF_NAME), str) or not route[CONF_NAME].strip():
             raise ValueError("Route name is required")
-        if not isinstance(route.get("route_id"), str) or not route["route_id"].strip():
+        if not isinstance(route.get(CONF_ROUTE_ID), str) or not route[CONF_ROUTE_ID].strip():
             raise ValueError("Route ID is required")
 
-class HoustonHeavyTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Houston Heavy Trash."""
+class HoustonTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Houston Trash."""
 
     VERSION = 1
 
@@ -59,7 +59,7 @@ class HoustonHeavyTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 },
             )
 
-        return self.async_create_entry(title="Houston Heavy Trash", data=user_input)
+        return self.async_create_entry(title="Houston Trash", data=user_input)
 
     @staticmethod
     @callback
@@ -67,9 +67,9 @@ class HoustonHeavyTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         config_entry: config_entries.ConfigEntry,
     ) -> config_entries.OptionsFlow:
         """Create the options flow."""
-        return HoustonHeavyTrashOptionsFlow(config_entry)
+        return HoustonTrashOptionsFlow(config_entry)
 
-class HoustonHeavyTrashOptionsFlow(config_entries.OptionsFlow):
+class HoustonTrashOptionsFlow(config_entries.OptionsFlow):
     """Handle options."""
 
     def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
@@ -88,12 +88,12 @@ class HoustonHeavyTrashOptionsFlow(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        "routes",
-                        default=[route for route in self.config_entry.data.get("routes", [])],
+                        CONF_ROUTES,
+                        default=[route for route in self.config_entry.data.get(CONF_ROUTES, [])],
                     ): [
                         {
-                            vol.Required("name"): str,
-                            vol.Required("route_id"): str,
+                            vol.Required(CONF_NAME): str,
+                            vol.Required(CONF_ROUTE_ID): str,
                         }
                     ],
                 }

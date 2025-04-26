@@ -1,122 +1,94 @@
-"""Sensor platform for the Houston Heavy Trash integration."""
+"""Sensor platform for Houston Heavy Trash."""
 from __future__ import annotations
 
-import aiohttp
-import logging
 from datetime import datetime, timezone
+from typing import Any
 
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.helpers.entity import DeviceInfo
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import (
-    ATTR_DAYS_UNTIL_PICKUP,
-    ATTR_LAST_UPDATE,
-    ATTR_ROUTE,
-    ATTR_STATUS,
-    CONF_ROUTE,
+    CONF_NAME,
+    CONF_ROUTE_ID,
+    CONF_ROUTES,
+    DEFAULT_NAME,
     DOMAIN,
-    ARCGIS_SERVICE_URL,
-    SCAN_INTERVAL,
+    SENSOR_TYPES,
 )
-
-_LOGGER = logging.getLogger(__name__)
+from .coordinator import HoustonHeavyTrashDataUpdateCoordinator
 
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up the sensor platform."""
-    coordinator = HoustonHeavyTrashCoordinator(hass, entry)
-    await coordinator.async_config_entry_first_refresh()
-    
-    # Create all sensors for this route
-    entities = [
-        HoustonHeavyTrashStatusSensor(coordinator, entry),
-        HoustonHeavyTrashServiceTypeSensor(coordinator, entry),
-        HoustonHeavyTrashServicedTodaySensor(coordinator, entry),
-        HoustonHeavyTrashServicedTomorrowSensor(coordinator, entry),
-        HoustonHeavyTrashServiceDateSensor(coordinator, entry),
-        HoustonHeavyTrashTomorrowServiceDateSensor(coordinator, entry),
-        HoustonHeavyTrashServiceCompletedSensor(coordinator, entry),
-        HoustonHeavyTrashCompletedDateSensor(coordinator, entry),
-    ]
-    
+    """Set up the Houston Heavy Trash sensors from a config entry."""
+    coordinator = hass.data[DOMAIN][entry.entry_id]
+
+    entities = []
+    for route in entry.data[CONF_ROUTES]:
+        for sensor_type in SENSOR_TYPES:
+            entities.append(
+                HoustonHeavyTrashSensor(
+                    coordinator,
+                    route[CONF_NAME],
+                    route[CONF_ROUTE_ID],
+                    sensor_type,
+                )
+            )
+
     async_add_entities(entities)
 
-class HoustonHeavyTrashCoordinator(DataUpdateCoordinator):
-    """Class to manage fetching data from the ArcGIS dashboard."""
+class HoustonHeavyTrashSensor(CoordinatorEntity, SensorEntity):
+    """Representation of a Houston Heavy Trash sensor."""
 
-    def __init__(self, hass: HomeAssistant, entry: ConfigEntry) -> None:
-        """Initialize."""
-        super().__init__(
-            hass,
-            _LOGGER,
-            name=DOMAIN,
-            update_interval=timedelta(minutes=SCAN_INTERVAL),
-        )
-        self._entry = entry
-        self._route = entry.data[CONF_ROUTE]
+    def __init__(
+        self,
+        coordinator: HoustonHeavyTrashDataUpdateCoordinator,
+        name: str,
+        route_id: str,
+        sensor_type: str,
+    ) -> None:
+        """Initialize the sensor."""
+        super().__init__(coordinator)
+        self._name = name
+        self._route_id = route_id
+        self._sensor_type = sensor_type
+        self._attr_name = f"{name} {SENSOR_TYPES[sensor_type]['name']}"
+        self._attr_unique_id = f"{route_id}_{sensor_type}"
+        self._attr_icon = SENSOR_TYPES[sensor_type]["icon"]
+        self._attr_device_class = None
+        self._attr_native_unit_of_measurement = SENSOR_TYPES[sensor_type]["unit_of_measurement"]
 
-    async def _async_update_data(self):
-        """Fetch data from the ArcGIS REST API."""
-        try:
-            async with aiohttp.ClientSession() as session:
-                # Add route filter to query parameters
-                query_params = {
-                    "where": f"NAME LIKE '%{self._route}%'",
-                    "outFields": "NAME,ServicedToday,ServicedTomorrow,ServicedDate,TomorrowServiceDate,ServiceCompleted,CompletedDate,SERVICE_TY",
-                    "returnGeometry": "false",
-                    "f": "json"
-                }
-                
-                async with session.get(ARCGIS_SERVICE_URL, params=query_params) as response:
-                    if response.status != 200:
-                        raise UpdateFailed(f"Error fetching data: {response.status}")
-                    
-                    data = await response.json()
-                    
-                    if "error" in data:
-                        raise UpdateFailed(f"ArcGIS API error: {data['error']}")
-                    
-                    if not data.get("features"):
-                        return {
-                            "status": "Unknown",
-                            "service_type": "Unknown",
-                            "serviced_today": "No",
-                            "serviced_tomorrow": "No",
-                            "service_date": None,
-                            "tomorrow_service_date": None,
-                            "service_completed": "No",
-                            "completed_date": None,
-                            "last_update": datetime.now(timezone.utc).isoformat(),
-                        }
-                    
-                    # Get the first feature (should only be one for a specific route)
-                    feature = data["features"][0]
-                    attributes = feature["attributes"]
-                    
-                    return {
-                        "status": self._calculate_status(attributes),
-                        "service_type": attributes.get("SERVICE_TY", "Unknown"),
-                        "serviced_today": attributes.get("ServicedToday", "No"),
-                        "serviced_tomorrow": attributes.get("ServicedTomorrow", "No"),
-                        "service_date": attributes.get("ServicedDate"),
-                        "tomorrow_service_date": attributes.get("TomorrowServiceDate"),
-                        "service_completed": attributes.get("ServiceCompleted", "No"),
-                        "completed_date": attributes.get("CompletedDate"),
-                        "last_update": datetime.now(timezone.utc).isoformat(),
-                    }
-                    
-        except Exception as err:
-            _LOGGER.error("Error communicating with ArcGIS API: %s", err)
-            raise UpdateFailed(f"Error communicating with API: {err}")
+    @property
+    def native_value(self) -> Any:
+        """Return the state of the sensor."""
+        if not self.coordinator.data:
+            return None
 
-    def _calculate_status(self, attrs):
+        route_data = self.coordinator.data.get(self._route_id)
+        if not route_data:
+            return None
+
+        if self._sensor_type == "status":
+            return self._calculate_status(route_data)
+        elif self._sensor_type == "next_pickup":
+            return self._get_next_pickup(route_data)
+        elif self._sensor_type == "service_type":
+            return route_data.get("SERVICE_TY")
+        elif self._sensor_type == "service_week":
+            return route_data.get("Service_WK")
+        elif self._sensor_type == "service_day":
+            return route_data.get("Day")
+        elif self._sensor_type == "quadrant":
+            return route_data.get("QUAD")
+
+        return None
+
+    def _calculate_status(self, attrs: dict) -> str:
         """Calculate the status based on the attributes."""
         now = datetime.now(timezone.utc)
         
@@ -143,166 +115,28 @@ class HoustonHeavyTrashCoordinator(DataUpdateCoordinator):
                 
         return "Unknown"
 
-class HoustonHeavyTrashBaseSensor(SensorEntity):
-    """Base class for Houston Heavy Trash sensors."""
-
-    def __init__(
-        self,
-        coordinator: HoustonHeavyTrashCoordinator,
-        entry: ConfigEntry,
-    ) -> None:
-        """Initialize the sensor."""
-        self._coordinator = coordinator
-        self._entry = entry
-        self._route = entry.data[CONF_ROUTE]
-        self._attr_device_info = DeviceInfo(
-            identifiers={(DOMAIN, self._route)},
-            name=f"Route: {self._route}",
-            manufacturer="City of Houston",
-            model="Heavy Trash Route",
-        )
+    def _get_next_pickup(self, attrs: dict) -> str:
+        """Get the next pickup date."""
+        if attrs.get("ServicedDate"):
+            service_date = datetime.fromtimestamp(attrs.get("ServicedDate")/1000, timezone.utc)
+            return service_date.strftime("%Y-%m-%d")
+        return None
 
     @property
-    def available(self) -> bool:
-        """Return if entity is available."""
-        return self._coordinator.last_update_success
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
+        if not self.coordinator.data:
+            return {}
 
-    async def async_added_to_hass(self) -> None:
-        """When entity is added to hass."""
-        await super().async_added_to_hass()
-        self._coordinator.async_add_listener(self.async_write_ha_state)
+        route_data = self.coordinator.data.get(self._route_id)
+        if not route_data:
+            return {}
 
-    async def async_will_remove_from_hass(self) -> None:
-        """When entity will be removed from hass."""
-        self._coordinator.async_remove_listener(self.async_write_ha_state)
-        await super().async_will_remove_from_hass()
-
-    async def async_update(self) -> None:
-        """Update the entity."""
-        await self._coordinator.async_request_refresh()
-
-class HoustonHeavyTrashStatusSensor(HoustonHeavyTrashBaseSensor):
-    """Status sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the status sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Status"
-        self._attr_unique_id = f"{entry.entry_id}-status"
-        self._attr_icon = "mdi:trash-can"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        return self._coordinator.data["status"]
-
-class HoustonHeavyTrashServiceTypeSensor(HoustonHeavyTrashBaseSensor):
-    """Service Type sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the service type sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Service Type"
-        self._attr_unique_id = f"{entry.entry_id}-service-type"
-        self._attr_icon = "mdi:information"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        return self._coordinator.data["service_type"]
-
-class HoustonHeavyTrashServicedTodaySensor(HoustonHeavyTrashBaseSensor):
-    """Serviced Today sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the serviced today sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Serviced Today"
-        self._attr_unique_id = f"{entry.entry_id}-serviced-today"
-        self._attr_icon = "mdi:calendar-today"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        return self._coordinator.data["serviced_today"]
-
-class HoustonHeavyTrashServicedTomorrowSensor(HoustonHeavyTrashBaseSensor):
-    """Serviced Tomorrow sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the serviced tomorrow sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Serviced Tomorrow"
-        self._attr_unique_id = f"{entry.entry_id}-serviced-tomorrow"
-        self._attr_icon = "mdi:calendar-arrow-right"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        return self._coordinator.data["serviced_tomorrow"]
-
-class HoustonHeavyTrashServiceDateSensor(HoustonHeavyTrashBaseSensor):
-    """Service Date sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the service date sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Service Date"
-        self._attr_unique_id = f"{entry.entry_id}-service-date"
-        self._attr_icon = "mdi:calendar"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        if date := self._coordinator.data["service_date"]:
-            return datetime.fromtimestamp(date/1000).strftime('%Y-%m-%d')
-        return "Unknown"
-
-class HoustonHeavyTrashTomorrowServiceDateSensor(HoustonHeavyTrashBaseSensor):
-    """Tomorrow Service Date sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the tomorrow service date sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Tomorrow Service Date"
-        self._attr_unique_id = f"{entry.entry_id}-tomorrow-service-date"
-        self._attr_icon = "mdi:calendar-arrow-right"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        if date := self._coordinator.data["tomorrow_service_date"]:
-            return datetime.fromtimestamp(date/1000).strftime('%Y-%m-%d')
-        return "Unknown"
-
-class HoustonHeavyTrashServiceCompletedSensor(HoustonHeavyTrashBaseSensor):
-    """Service Completed sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the service completed sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Service Completed"
-        self._attr_unique_id = f"{entry.entry_id}-service-completed"
-        self._attr_icon = "mdi:check-circle"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        return self._coordinator.data["service_completed"]
-
-class HoustonHeavyTrashCompletedDateSensor(HoustonHeavyTrashBaseSensor):
-    """Completed Date sensor for Houston Heavy Trash."""
-
-    def __init__(self, coordinator, entry):
-        """Initialize the completed date sensor."""
-        super().__init__(coordinator, entry)
-        self._attr_name = f"Heavy Trash Completed Date"
-        self._attr_unique_id = f"{entry.entry_id}-completed-date"
-        self._attr_icon = "mdi:calendar-check"
-
-    @property
-    def state(self) -> str:
-        """Return the state of the sensor."""
-        if date := self._coordinator.data["completed_date"]:
-            return datetime.fromtimestamp(date/1000).strftime('%Y-%m-%d')
-        return "Unknown" 
+        return {
+            "route_id": self._route_id,
+            "service_week": route_data.get("Service_WK"),
+            "service_day": route_data.get("Day"),
+            "quadrant": route_data.get("QUAD"),
+            "service_type": route_data.get("SERVICE_TY"),
+            "last_update": datetime.now().isoformat(),
+        } 

@@ -21,7 +21,20 @@ A collection of custom components for Home Assistant, created by Shatti.
 
 ## Available Components
 
-Components will be listed here as they are created.
+### Houston Heavy Trash
+Track Houston Heavy Trash pickup schedules and status. Provides sensors and calendar entries for your heavy trash pickup schedule.
+
+[Documentation](#houston-heavy-trash-integration)
+
+### Houston Trash
+Track regular Houston trash pickup schedules. Provides sensors for your regular trash pickup schedule.
+
+[Documentation](#houston-trash-integration)
+
+### Houston Active Incidents
+Monitor active incidents in Houston, including fire department and police department responses.
+
+[Documentation](#houston-active-incidents-integration)
 
 ## Configuration
 
@@ -35,90 +48,153 @@ If you encounter any issues or have questions, please open an issue in this repo
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-# Houston Heavy Trash
+# Houston Heavy Trash Integration
 
-A Home Assistant integration for tracking Houston's Heavy Trash pickup schedules.
-
-## Features
-
-- Real-time status of heavy trash pickup for your route
-- Multiple sensors providing detailed information:
-  - Current pickup status
-  - Service type
-  - Today's service status
-  - Tomorrow's service status
-  - Service dates
-  - Completion status
-- Calendar integration showing upcoming pickup dates
-- Automatic updates every 30 minutes
+A Home Assistant integration for tracking Houston Heavy Trash pickup schedules and status.
 
 ## Installation
 
-### HACS (Recommended)
-1. Open HACS in Home Assistant
-2. Go to the Integrations tab
-3. Click the three dots in the top right and select "Custom repositories"
-4. Add this repository URL
-5. Search for "Houston Heavy Trash" and install it
-6. Restart Home Assistant
+1. Download this repository
+2. Copy the `houston_heavy_trash` folder to your Home Assistant `custom_components` directory
+3. Restart Home Assistant
 
-### Manual Installation
-1. Download the `houston_heavy_trash` directory
-2. Copy it to your `custom_components` directory in Home Assistant
+## Finding Your Route ID
+
+You can find your route ID using the City of Houston's [Heavy Trash Progress Dashboard](https://mycity.maps.arcgis.com/apps/dashboards/cb0ac86b3b434513b5f22428385820f3):
+
+1. Open the dashboard in your web browser
+2. Use the search function or zoom to your location
+3. Click on your area to see the route information
+4. The route ID will be in the format `SW4TH_08` where:
+   - First two letters indicate the quadrant (NE, NW, SE, SW)
+   - Next part indicates the week (1st, 2nd, 3rd, 4th)
+   - Last part indicates the day (TH for Thursday, etc.)
+   - Final number is the route number
+
+## Configuration
+
+Add the following to your `configuration.yaml`:
+
+```yaml
+houston_heavy_trash:
+  routes:
+    - name: "My Heavy Trash"  # Friendly name for the route
+      route_id: "NE4TH_08"    # Route ID from the city's system
+```
+
+### Configuration Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| name | Yes | Friendly name for the route |
+| route_id | Yes | Route ID from the city's system (e.g., NE4TH_08) |
+
+## Available Components
+
+### Sensors
+
+For each configured route, the following sensors will be created:
+
+- `sensor.{route_name}_status`: Current status of the heavy trash service
+- `sensor.{route_name}_next_pickup`: Next scheduled pickup date
+- `sensor.{route_name}_service_type`: Type of service (e.g., HT for Heavy Trash)
+- `sensor.{route_name}_service_week`: Week of the month for service
+- `sensor.{route_name}_service_day`: Day of the week for service
+- `sensor.{route_name}_quadrant`: City quadrant (NE, NW, SE, SW)
+
+### Calendar
+
+A calendar entity is created for each route showing:
+- Next scheduled pickup date
+- Service completion status
+- Service type and schedule information
+
+# Houston Trash Integration
+
+A Home Assistant integration for tracking regular Houston trash pickup schedules.
+
+## Installation
+
+1. Download this repository
+2. Copy the `houston_trash` folder to your Home Assistant `custom_components` directory
 3. Restart Home Assistant
 
 ## Configuration
 
-1. Go to Home Assistant Settings > Devices & Services
-2. Click "Add Integration"
-3. Search for "Houston Heavy Trash"
-4. Enter your route number (e.g., "NE4TH_08")
-5. Click "Submit"
+Add the following to your `configuration.yaml`:
 
-## Available Sensors
+```yaml
+houston_trash:
+  routes:
+    - name: "My Trash"  # Friendly name for the route
+      route_id: "NE4TH_08"    # Route ID from the city's system
+```
 
-Each route will create the following sensors:
+### Configuration Variables
 
-- **Heavy Trash Status**: Current status of pickup (e.g., "1-3 Days", "In Progress", "Completed")
-- **Heavy Trash Service Type**: Type of service (e.g., "HT" for Heavy Trash)
-- **Heavy Trash Serviced Today**: Whether service is happening today ("Yes"/"No")
-- **Heavy Trash Serviced Tomorrow**: Whether service is scheduled for tomorrow ("Yes"/"No")
-- **Heavy Trash Service Date**: The scheduled service date
-- **Heavy Trash Tomorrow Service Date**: The next scheduled service date
-- **Heavy Trash Service Completed**: Whether service has been completed ("Yes"/"No")
-- **Heavy Trash Completed Date**: The date when service was completed
+| Variable | Required | Description |
+|----------|----------|-------------|
+| name | Yes | Friendly name for the route |
+| route_id | Yes | Route ID from the city's system (e.g., NE4TH_08) |
 
-## Calendar Integration
+## Available Components
 
-The integration creates a calendar entity for each route that shows upcoming pickup dates:
+### Sensors
 
-- **In Progress**: Shows an event for today
-- **Scheduled for Tomorrow**: Shows an event for tomorrow
-- **1-3 Days**: Shows an event for 3 days from now
-- **4-7 Days**: Shows an event spanning 4-7 days from now
-- **Completed** or **8+ Days**: No calendar event is shown
+For each configured route, the following sensors will be created:
 
-The calendar events include:
-- Route name in the event title
-- Status description
-- All-day events for easy visibility
-- Automatic updates as the status changes
+- `sensor.{route_name}_status`: Current status of the trash service
+- `sensor.{route_name}_next_pickup`: Next scheduled pickup date
+- `sensor.{route_name}_service_type`: Type of service
+- `sensor.{route_name}_service_week`: Week of the month for service
+- `sensor.{route_name}_service_day`: Day of the week for service
+- `sensor.{route_name}_quadrant`: City quadrant (NE, NW, SE, SW)
 
-## Status Meanings
+# Houston Active Incidents Integration
 
-- **In Progress**: Pickup is happening today
-- **Scheduled in X days**: Pickup is scheduled for tomorrow
-- **1-3 Days**: Pickup is expected in 1-3 days
-- **4-7 Days**: Pickup is expected in 4-7 days
-- **8+ Days**: Pickup is more than a week away
-- **Completed**: Pickup has been completed
+A Home Assistant integration for monitoring active incidents in Houston, including fire department and police department responses.
 
-## Support
+## Installation
 
-If you encounter any issues or have questions:
-1. Check the [Home Assistant forums](https://community.home-assistant.io/)
-2. Open an issue in this repository
+1. Download this repository
+2. Copy the `houston_incidents` folder to your Home Assistant `custom_components` directory
+3. Restart Home Assistant
 
-## License
+## Configuration
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+Add the following to your `configuration.yaml`:
+
+```yaml
+sensor:
+  - platform: houston_incidents
+    name: "Houston Active Incidents"  # Optional, defaults to "Houston Active Incidents"
+```
+
+### Configuration Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| name | No | Friendly name for the sensor (defaults to "Houston Active Incidents") |
+
+## Available Components
+
+### Sensors
+
+The following sensor will be created:
+
+- `sensor.houston_active_incidents`: Shows total number of active incidents
+
+### Attributes
+
+The sensor includes the following attributes:
+
+- `fd_incidents`: Number of active Fire Department incidents
+- `pd_incidents`: Number of active Police Department incidents
+- `incidents`: List of all active incidents with details including:
+  - Agency (FD/PD)
+  - Address
+  - Cross Street
+  - Key Map
+  - Call Time (Opened)
+  - Incident Type
+  - Combined Response (Y/N) 

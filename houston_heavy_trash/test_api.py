@@ -37,23 +37,37 @@ def calculate_status(attrs):
             
     return "Unknown"
 
-# Query parameters
-ARCGIS_QUERY_PARAMS = {
-    "where": "NAME LIKE '%{}%'".format(TEST_ROUTE),  # Search for specific route
-    "outFields": "NAME,ServicedToday,ServicedTomorrow,ServicedDate,TomorrowServiceDate,ServiceCompleted,CompletedDate,SERVICE_TY",
-    "returnGeometry": "false",
-    "f": "json"
-}
-
 async def test_endpoint():
-    """Test the ArcGIS endpoint."""
+    """Test the ArcGIS endpoint and explore available data."""
     print(f"Testing Heavy Trash Progress endpoint for route: {TEST_ROUTE}")
     print(f"API URL: {ARCGIS_SERVICE_URL}")
-    print(f"Query parameters: {json.dumps(ARCGIS_QUERY_PARAMS, indent=2)}")
+    
+    # First, get all available fields
+    fields_params = {
+        "f": "json"
+    }
     
     try:
         async with aiohttp.ClientSession() as session:
-            async with session.get(ARCGIS_SERVICE_URL, params=ARCGIS_QUERY_PARAMS) as response:
+            # Get layer information
+            async with session.get(ARCGIS_SERVICE_URL.replace("/query", ""), params=fields_params) as response:
+                if response.status == 200:
+                    layer_info = await response.json()
+                    print("\nAvailable Fields:")
+                    for field in layer_info.get("fields", []):
+                        print(f"- {field['name']} ({field['type']}): {field.get('alias', 'No description')}")
+                
+            # Now get data for our route
+            query_params = {
+                "where": f"NAME LIKE '%{TEST_ROUTE}%'",
+                "outFields": "*",  # Get all fields
+                "returnGeometry": "false",
+                "f": "json"
+            }
+            
+            print(f"\nQuery parameters: {json.dumps(query_params, indent=2)}")
+            
+            async with session.get(ARCGIS_SERVICE_URL, params=query_params) as response:
                 print(f"\nResponse Status: {response.status}")
                 
                 if response.status != 200:
@@ -70,27 +84,21 @@ async def test_endpoint():
                     print(f"\nNo data found for route: {TEST_ROUTE}")
                     return
                 
-                # Print information for the route
+                # Print all available information for the route
                 for feature in data["features"]:
                     attrs = feature["attributes"]
                     status = calculate_status(attrs)
                     
                     print("\nRoute Information:")
-                    print(f"Name: {attrs.get('NAME')}")
-                    print(f"Service Type: {attrs.get('SERVICE_TY')}")
-                    print(f"Current Status: {status}")
-                    print(f"Serviced Today: {attrs.get('ServicedToday')}")
-                    print(f"Serviced Tomorrow: {attrs.get('ServicedTomorrow')}")
-                    
-                    if attrs.get("ServicedDate"):
-                        print(f"Service Date: {datetime.fromtimestamp(attrs.get('ServicedDate')/1000).strftime('%Y-%m-%d')}")
-                    
-                    if attrs.get("TomorrowServiceDate"):
-                        print(f"Tomorrow Service Date: {datetime.fromtimestamp(attrs.get('TomorrowServiceDate')/1000).strftime('%Y-%m-%d')}")
-                    
-                    if attrs.get("ServiceCompleted") == "Yes":
-                        print(f"Completed Date: {datetime.fromtimestamp(attrs.get('CompletedDate')/1000).strftime('%Y-%m-%d')}")
-                    
+                    print(f"Status: {status}")
+                    for key, value in attrs.items():
+                        if isinstance(value, (int, float)) and key.endswith("Date"):
+                            # Convert timestamp to readable date
+                            try:
+                                value = datetime.fromtimestamp(value/1000).strftime('%Y-%m-%d')
+                            except:
+                                pass
+                        print(f"{key}: {value}")
                     print("-" * 50)
                 
     except Exception as e:

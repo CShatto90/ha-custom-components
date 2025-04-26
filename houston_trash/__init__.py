@@ -1,4 +1,4 @@
-"""The Houston Heavy Trash integration."""
+"""The Houston Trash integration."""
 from __future__ import annotations
 
 import logging
@@ -9,16 +9,16 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 
-from .const import DOMAIN, SCAN_INTERVAL
-from .coordinator import HoustonHeavyTrashDataUpdateCoordinator
+from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
+from .coordinator import HoustonTrashDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
 PLATFORMS = [Platform.SENSOR, Platform.CALENDAR]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Set up Houston Heavy Trash from a config entry."""
-    coordinator = HoustonHeavyTrashDataUpdateCoordinator(hass, entry)
+    """Set up Houston Trash from a config entry."""
+    coordinator = HoustonTrashDataUpdateCoordinator(hass, entry.data["base_url"])
     await coordinator.async_config_entry_first_refresh()
 
     hass.data.setdefault(DOMAIN, {})

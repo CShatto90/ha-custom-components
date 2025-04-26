@@ -1,0 +1,32 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "Houston Heavy Trash",
+                "description": "Add your heavy trash routes. {config_instructions}",
+                "data": {
+                    "routes": "Routes"
+                }
+            }
+        },
+        "error": {
+            "invalid_route": "Invalid route configuration",
+            "invalid_name": "Route name is required",
+            "invalid_route_id": "Route ID is required"
+        },
+        "abort": {
+            "already_configured": "Integration is already configured"
+        }
+    },
+    "options": {
+        "step": {
+            "init": {
+                "title": "Houston Heavy Trash Options",
+                "description": "Update your heavy trash routes. {config_instructions}",
+                "data": {
+                    "routes": "Routes"
+                }
+            }
+        }
+    }
+} 
