@@ -5,9 +5,7 @@ DOMAIN = "houston_trash"
 PLATFORMS = ["sensor", "calendar"]
 
 # Configuration
-CONF_ROUTES = "routes"
-CONF_NAME = "name"
-CONF_ROUTE_ID = "route_id"
+CONF_BASE_URL = "base_url"
 
 # Defaults
 DEFAULT_SCAN_INTERVAL = timedelta(hours=12)

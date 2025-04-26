@@ -7,29 +7,22 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN, CONF_ROUTES, CONF_NAME, CONF_ROUTE_ID, DASHBOARD_URL
+from .const import DOMAIN, CONF_BASE_URL
 
 CONFIG_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_ROUTES): [
-            {
-                vol.Required(CONF_NAME): str,
-                vol.Required(CONF_ROUTE_ID): str,
-            }
-        ]
+        vol.Required(CONF_BASE_URL): str,
     }
 )
 
 async def validate_config(hass: HomeAssistant, data: dict) -> None:
     """Validate the configuration."""
-    if not isinstance(data.get(CONF_ROUTES), list):
-        raise ValueError("Routes must be a list")
+    if not isinstance(data.get(CONF_BASE_URL), str) or not data[CONF_BASE_URL].strip():
+        raise ValueError("Base URL is required")
     
-    for route in data[CONF_ROUTES]:
-        if not isinstance(route.get(CONF_NAME), str) or not route[CONF_NAME].strip():
-            raise ValueError("Route name is required")
-        if not isinstance(route.get(CONF_ROUTE_ID), str) or not route[CONF_ROUTE_ID].strip():
-            raise ValueError("Route ID is required")
+    # Basic URL validation
+    if not data[CONF_BASE_URL].startswith(("http://", "https://")):
+        raise ValueError("Base URL must start with http:// or https://")
 
 class HoustonTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Houston Trash."""
@@ -42,9 +35,6 @@ class HoustonTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_form(
                 step_id="user",
                 data_schema=CONFIG_SCHEMA,
-                description_placeholders={
-                    "dashboard_url": DASHBOARD_URL,
-                },
             )
 
         try:
@@ -54,9 +44,6 @@ class HoustonTrashConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 step_id="user",
                 data_schema=CONFIG_SCHEMA,
                 errors={"base": str(err)},
-                description_placeholders={
-                    "dashboard_url": DASHBOARD_URL,
-                },
             )
 
         return self.async_create_entry(title="Houston Trash", data=user_input)
@@ -88,17 +75,9 @@ class HoustonTrashOptionsFlow(config_entries.OptionsFlow):
             data_schema=vol.Schema(
                 {
                     vol.Required(
-                        CONF_ROUTES,
-                        default=[route for route in self.config_entry.data.get(CONF_ROUTES, [])],
-                    ): [
-                        {
-                            vol.Required(CONF_NAME): str,
-                            vol.Required(CONF_ROUTE_ID): str,
-                        }
-                    ],
+                        CONF_BASE_URL,
+                        default=self.config_entry.data.get(CONF_BASE_URL),
+                    ): str,
                 }
             ),
-            description_placeholders={
-                "dashboard_url": DASHBOARD_URL,
-            },
         ) 

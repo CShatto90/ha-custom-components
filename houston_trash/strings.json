@@ -3,16 +3,15 @@
         "step": {
             "user": {
                 "title": "Houston Trash",
-                "description": "Add your trash routes. {config_instructions}",
+                "description": "Configure the Houston Trash integration with your base URL.",
                 "data": {
-                    "routes": "Routes"
+                    "base_url": "Base URL"
                 }
             }
         },
         "error": {
-            "invalid_route": "Invalid route configuration",
-            "invalid_name": "Route name is required",
-            "invalid_route_id": "Route ID is required"
+            "invalid_url": "Invalid base URL format",
+            "required_url": "Base URL is required"
         },
         "abort": {
             "already_configured": "Integration is already configured"
@@ -22,9 +21,9 @@
         "step": {
             "init": {
                 "title": "Houston Trash Options",
-                "description": "Update your trash routes. {config_instructions}",
+                "description": "Update your Houston Trash configuration.",
                 "data": {
-                    "routes": "Routes"
+                    "base_url": "Base URL"
                 }
             }
         }
