@@ -1,10 +1,10 @@
 {
   "domain": "houston_incidents",
-  "name": "Houston Active Incidents",
-  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/README.md",
+  "name": "Houston Incidents",
+  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/custom_components/houston_incidents/README.md",
   "dependencies": [],
   "codeowners": ["@Shatti"],
-  "requirements": ["beautifulsoup4>=4.9.3", "requests>=2.25.1"],
+  "requirements": ["aiohttp>=3.8.0"],
   "version": "1.0.0",
   "iot_class": "cloud_polling",
   "attribution": "Data provided by City of Houston"

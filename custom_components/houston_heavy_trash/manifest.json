@@ -1,11 +1,11 @@
 {
   "domain": "houston_heavy_trash",
   "name": "Houston Heavy Trash",
-  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/README.md",
+  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/custom_components/houston_heavy_trash/README.md",
   "dependencies": [],
   "codeowners": ["@Shatti"],
   "requirements": ["aiohttp>=3.8.0"],
   "version": "1.0.0",
   "iot_class": "cloud_polling",
-  "attribution": "Data provided by City of Houston via ArcGIS Online"
+  "attribution": "Data provided by City of Houston"
 } 
