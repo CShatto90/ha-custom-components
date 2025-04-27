@@ -1,7 +1,7 @@
 {
   "domain": "houston_trash",
   "name": "Houston Trash",
-  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/custom_components/houston_trash/README.md",
+  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/README.md",
   "dependencies": [],
   "codeowners": ["@Shatti"],
   "requirements": ["aiohttp>=3.8.0"],
