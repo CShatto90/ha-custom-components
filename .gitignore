@@ -35,4 +35,7 @@ wheels/
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+
+# Git automation scripts
+git-commit-push.ps1 
