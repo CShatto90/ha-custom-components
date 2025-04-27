@@ -1,9 +1,11 @@
 {
   "domain": "houston_trash",
-  "name": "Houston Trash Collection",
-  "documentation": "https://github.com/yourusername/ha-custom-components",
+  "name": "Houston Trash",
+  "documentation": "https://gitea.shatto.cloud/Shatti/ha-custom-components/src/branch/main/README.md",
   "dependencies": [],
-  "codeowners": ["@yourusername"],
-  "requirements": [],
-  "version": "1.0.0"
+  "codeowners": ["@Shatti"],
+  "requirements": ["aiohttp>=3.8.0"],
+  "version": "1.0.0",
+  "iot_class": "cloud_polling",
+  "attribution": "Data provided by City of Houston"
 } 
