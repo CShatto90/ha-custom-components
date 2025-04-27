@@ -2,5 +2,9 @@
   "name": "Houston Services",
   "render_readme": true,
   "domains": ["houston_trash", "houston_heavy_trash", "houston_incidents"],
-  "homeassistant": "2024.1.0"
+  "homeassistant": "2024.1.0",
+  "repository": "https://gitea.shatto.cloud/ha-custom-components",
+  "content_in_root": false,
+  "zip_release": false,
+  "filename": null
 } 
