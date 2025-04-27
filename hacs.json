@@ -2,5 +2,8 @@
   "name": "Houston Services",
   "render_readme": true,
   "domains": ["houston_trash", "houston_heavy_trash", "houston_incidents"],
-  "homeassistant": "2024.1.0"
+  "homeassistant": "2024.1.0",
+  "country": ["US"],
+  "persistent_directory": "custom_components",
+  "zip_release": true
 } 
