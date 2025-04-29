@@ -6,12 +6,16 @@ on:
 
 jobs:
   mirror:
-    runs-on: local
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: pixta-dev/repository-mirroring-action@v1
-        with:
-          target_repo_url: git@github.com:Shatti/ha-custom-components.git
-          ssh_private_key: ${{ secrets.GITHUB_SSH_KEY }}
+      - name: Push to GitHub
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote add github https://$GITHUB_TOKEN@github.com/Shatti/ha-custom-components.git
+          git fetch --unshallow
+          git push github --all --force
+          git push github --tags --force
