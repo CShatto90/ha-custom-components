@@ -1,14 +1,7 @@
 {
   "name": "Houston Services",
-  "render_readme": true,
-  "domains": ["houston_trash", "houston_heavy_trash", "houston_incidents"],
   "homeassistant": "2024.1.0",
-  "repository": "https://gitea.shatto.cloud/Shatti/ha-custom-components",
   "content_in_root": false,
   "zip_release": false,
-  "filename": null,
-  "hacs": "1.6.0",
-  "hide_default_branch": false,
-  "authors": ["Shatti"],
-  "issue_tracker": "https://gitea.shatto.cloud/Shatti/ha-custom-components/issues"
+  "hide_default_branch": false
 } 
