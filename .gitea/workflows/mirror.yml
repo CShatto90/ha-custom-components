@@ -4,13 +4,17 @@ on:
     branches:
       - main
 
-
 jobs:
   mirror:
     runs-on: local
     steps:
-      - name: Checkout
+      - name: Mirror to GitHub
         run: |
-          git clone --mirror https://gitea.shatto.cloud/Shatti/ha-custom-components.git .
+          TEMP_DIR=$(mktemp -d)
+          cd $TEMP_DIR
+          git clone --mirror https://gitea.shatto.cloud/Shatti/ha-custom-components.git
+          cd ha-custom-components.git
           git remote add github https://${{ secrets.GITHUB_ACCESS_TOKEN }}@github.com/Shatti/ha-custom-components.git
           git push --mirror github
+          cd ..
+          rm -rf $TEMP_DIR
