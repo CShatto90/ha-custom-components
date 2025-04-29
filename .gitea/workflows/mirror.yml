@@ -11,9 +11,6 @@ jobs:
     steps:
       - name: Checkout
         run: |
-          git clone --mirror ${GITEA_REPO_URL} .
-          git remote add github ${GITHUB_REPO_URL}
+          git clone --mirror https://gitea.shatto.cloud/Shatti/ha-custom-components.git .
+          git remote add github https://${{ secrets.GITHUB_ACCESS_TOKEN }}@github.com/Shatti/ha-custom-components.git
           git push --mirror github
-        env:
-          GITEA_REPO_URL: ${{ secrets.GITEA_REPO_URL }}
-          GITHUB_REPO_URL: https://${{ secrets.GITHUB_ACCESS_TOKEN }}@github.com/Shatti/ha-custom-components.git
