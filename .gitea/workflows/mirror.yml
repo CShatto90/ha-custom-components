@@ -15,6 +15,8 @@ jobs:
           git clone --mirror https://gitea.shatto.cloud/Shatti/ha-custom-components.git
           cd ha-custom-components.git
           git remote add github https://${{ secrets.GITHUB_ACCESS_TOKEN }}@github.com/Shatti/ha-custom-components.git
-          git push --mirror github
+          git config --global push.default matching
+          git push github --all
+          git push github --tags
           cd ..
           rm -rf $TEMP_DIR
