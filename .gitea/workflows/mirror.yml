@@ -6,7 +6,7 @@
    
    jobs:
      mirror:
-       runs-on: Local
+       runs-on: local
        steps:
          - name: Checkout
            uses: actions/checkout@v4
