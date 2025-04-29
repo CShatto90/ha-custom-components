@@ -15,5 +15,5 @@ jobs:
           cd $(mktemp -d) 
           echo $GITHUB_TOKEN
           git clone --mirror https://gitea.shatto.cloud/Shatti/ha-custom-components.git .
-          git remote add main https://$GITHUB_TOKEN@github.com/CShatto90/ha-custom-components.git
-          git push --mirror main
+          git remote add github https://${GITHUB_TOKEN}@github.com/CShatto90/ha-custom-components.git
+          git push --mirror github
