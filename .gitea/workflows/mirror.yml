@@ -8,14 +8,11 @@ jobs:
   mirror:
     runs-on: local
     steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Push to GitHub
+      - name: Mirror to GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git remote add github https://$GITHUB_TOKEN@github.com/Shatti/ha-custom-components.git
-          git fetch --unshallow
-          git push github --all --force
-          git push github --tags --force
+          cd $(mktemp -d)
+          git clone --mirror https://gitea.shatto.cloud/Shatti/ha-custom-components.git .
+          git remote add github https://${GITHUB_TOKEN}@github.com/Shatti/ha-custom-components.git
+          git push --mirror github
