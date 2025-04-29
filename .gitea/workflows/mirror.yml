@@ -6,25 +6,12 @@ on:
 
 jobs:
   mirror:
-    runs-on: local
+    runs-on: ubuntu-latest
     steps:
-      - name: Mirror to GitHub
-        run: |
-          # First, get the current repo content
-          REPO_DATA=$(curl -L -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_ACCESS_TOKEN }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/Shatti/ha-custom-components/contents")
-          
-          # For each file in our local repo, update it on GitHub
-          find . -type f -not -path '*/\.git/*' -not -path '*/\.gitea/*' | while read file; do
-            # Remove leading ./
-            FILEPATH=${file#./}
-            
-            # Create/update file on GitHub
-            curl -X PUT -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.GITHUB_ACCESS_TOKEN }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/repos/Shatti/ha-custom-components/contents/$FILEPATH" \
-              -d "{\"message\":\"Mirror update from Gitea\",\"content\":\"$(base64 -w 0 $file)\"}"
-          done
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pixta-dev/repository-mirroring-action@v1
+        with:
+          target_repo_url: git@github.com:Shatti/ha-custom-components.git
+          ssh_private_key: ${{ secrets.GITHUB_SSH_KEY }}
