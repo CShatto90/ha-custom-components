@@ -1,48 +1,42 @@
-# Home Assistant Custom Components Collection
+# Houston Services for Home Assistant
 
-A collection of custom components for Home Assistant, created by Shatti.
-
-## Installation
-
-### HACS Installation (Recommended)
-1. Open HACS in your Home Assistant instance
-2. Click on the three dots in the top right corner
-3. Select "Custom repositories"
-4. Add this repository URL: `https://gitea.shatto.cloud/Shatti/ha-custom-components`
-5. Select "Integration" as the category
-6. Click "Add"
-7. Find the component you want to install in HACS and click "Download"
-
-### Manual Installation
-1. Download this repository
-2. Copy the contents of the `custom_components` folder to your Home Assistant's `custom_components` directory
-3. Restart Home Assistant
-4. Configure the components through the Home Assistant UI (Configuration -> Integrations)
+This repository contains multiple custom components for Home Assistant that provide integration with various City of Houston services.
 
 ## Available Components
 
-### Houston Heavy Trash
-Track Houston Heavy Trash pickup schedules and status. Provides sensors and calendar entries for your heavy trash pickup schedule.
-
-[Documentation](#houston-heavy-trash-integration)
+### Houston Incidents
+Track active incidents in the Houston area with real-time updates.
+[More information](custom_components/houston_incidents/README.md)
 
 ### Houston Trash
-Track regular Houston trash pickup schedules. Provides sensors for your regular trash pickup schedule.
+Track regular trash and recycling collection schedules.
+[More information](custom_components/houston_trash/README.md)
 
-[Documentation](#houston-trash-integration)
+### Houston Heavy Trash
+Track heavy trash and tree waste collection schedules.
+[More information](custom_components/houston_heavy_trash/README.md)
 
-### Houston Active Incidents
-Monitor active incidents in Houston, including fire department and police department responses.
+## Installation
 
-[Documentation](#houston-active-incidents-integration)
+1. Add this repository to HACS:
+   - In HACS, click the ⋮ button in the top right
+   - Select "Custom repositories"
+   - Add the URL of this repository
+   - Select "Integration" as the category
 
-## Configuration
+2. Install each component you want to use:
+   - In HACS, go to "Integrations"
+   - Click the "+" button in the bottom right
+   - Search for "Houston" and you'll see all available components
+   - Click "Download" for each component you want to use
 
-Each component has its own configuration instructions. Please refer to the individual component's documentation in its directory.
+3. Configure the components in your `configuration.yaml` file according to each component's documentation.
+
+4. Restart Home Assistant
 
 ## Support
 
-If you encounter any issues or have questions, please open an issue in this repository.
+If you're having issues, please check the individual component documentation first, then open an issue in this repository if needed.
 
 ## License
 

@@ -1,6 +1,27 @@
-# Houston Trash Integration
+# Houston Trash Collection
 
-This integration provides sensors and calendars for Houston trash and recycling pickup schedules.
+This component integrates Houston trash collection schedule data into Home Assistant. It provides sensors and calendar entities for tracking trash collection schedules.
+
+## Features
+- Trash collection schedule tracking
+- Calendar integration
+- Next pickup date sensors
+
+## Installation
+1. Add this repository to HACS
+2. Install the "Houston Trash" integration
+3. Add configuration to your `configuration.yaml`
+
+## Configuration
+```yaml
+houston_trash:
+  scan_interval: 3600  # Optional, defaults to 1 hour
+```
+
+## Available Entities
+- Calendar showing collection schedule
+- Sensors for next pickup dates
+- Binary sensors for collection day status
 
 ## Configuration
 
