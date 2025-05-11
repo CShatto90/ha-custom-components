@@ -7,5 +7,9 @@
     "houston_incidents",
     "houston_trash",
     "houston_heavy_trash"
-  ]
+  ],
+  "country": "US",
+  "version": "1.0.0",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/yourusername/ha-custom-components/issues"
 } 
