@@ -1,0 +1,9 @@
+{
+  "name": "Houston Services - Houston Trash",
+  "content_in_root": true,
+  "render_readme": true,
+  "homeassistant": "2024.1.0",
+  "hacs": "1.30.0",
+  "version": "1.0.0",
+  "iot_class": "cloud_polling"
+}

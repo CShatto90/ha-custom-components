@@ -11,5 +11,6 @@
   "country": "US",
   "version": "1.0.0",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/yourusername/ha-custom-components/issues"
+  "issue_tracker": "https://gitea.shatto.cloud/Shatti/ha-custom-components/issues",
+  "persistent_directory": "custom_components"
 } 
