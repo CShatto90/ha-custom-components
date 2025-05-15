@@ -1,3 +1,12 @@
+name: Mirror to GitHub
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  mirror:
+    runs-on: local
     steps:
       - name: Mirror to GitHub
         run: |
